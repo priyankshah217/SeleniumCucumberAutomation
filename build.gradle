@@ -1,0 +1,91 @@
+import net.masterthought.cucumber.Configuration
+import net.masterthought.cucumber.ReportBuilder
+import net.masterthought.cucumber.Reportable
+
+buildscript {
+    repositories {
+        maven {
+            url "http://repo.bodar.com"
+        }
+        mavenCentral()
+    }
+    dependencies {
+        classpath "net.masterthought:cucumber-reporting:3.16.0"
+    }
+}
+
+plugins {
+    id 'java'
+}
+
+group 'com.sample.assignment'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    // https://mvnrepository.com/artifact/io.cucumber/cucumber-java8
+    compile group: 'io.cucumber', name: 'cucumber-java8', version: '2.4.0'
+    // https://mvnrepository.com/artifact/io.cucumber/cucumber-junit
+    testCompile group: 'io.cucumber', name: 'cucumber-junit', version: '2.4.0'
+    // https://mvnrepository.com/artifact/net.masterthought/cucumber-reporting
+    compile group: 'net.masterthought', name: 'cucumber-reporting', version: '3.16.0'
+    // https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java
+    compile group: 'org.seleniumhq.selenium', name: 'selenium-java', version: '3.11.0'
+}
+
+configurations {
+    cucumberRuntime {
+        extendsFrom testRuntime
+    }
+}
+
+
+
+task e2e() {
+    dependsOn assemble, compileTestJava
+    doLast {
+        def arglist = ["-p", "pretty", "-p", "json:${reporting.baseDir}/cucumber/cucumber.json", "--glue", "com.test.webautomation.stepfefs",
+                       "${project.projectDir}/src/test/resources"]
+
+        def runStatus = javaexec {
+            ignoreExitValue = true
+            main = "cucumber.api.cli.Main"
+            classpath = configurations.cucumberRuntime + sourceSets.test.output
+            args = arglist
+            systemProperties System.getProperties()
+        }
+        generateReport()
+        if (runStatus.exitValue != 0)
+            throw new GradleException("Test Failed")
+    }
+}
+
+def generateReport() {
+    def jsonReports = fileTree(dir: "${reporting.baseDir}/cucumber/").include '**/*.json'.toString()
+    File reportOutputDirectory = new File("${reporting.baseDir}/cucumber")
+
+    List<String> jsonReportFiles = new ArrayList<String>()
+    jsonReports.each { File file ->
+        jsonReportFiles.add("${reporting.baseDir}/cucumber/${file.name}".toString())
+    }
+
+    Configuration configuration = new Configuration(reportOutputDirectory, "cucumber-gradle-parallel")
+    // optional configuration
+    configuration.setParallelTesting(true)
+    configuration.setRunWithJenkins(false)
+    configuration.setBuildNumber("1988")
+
+    ReportBuilder reportBuilder = new ReportBuilder(jsonReportFiles, configuration)
+    Reportable result = reportBuilder.generateReports()
+    println("\nReport available on: ${reporting.baseDir}/cucumber/cucumber-html-reports/overview-features.html")
+}
+
+
