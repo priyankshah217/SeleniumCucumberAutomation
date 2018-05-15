@@ -28,7 +28,7 @@ node {
         cucumber fileIncludePattern: '**/*.json', jsonReportDirectory: 'build/reports', sortingMethod: 'ALPHABETICAL'
     }
 
-    if (buildStatus == 'FAILED') {
+    if (buildResult == 'FAILED') {
         manager.buildFailure()
     }
 }
