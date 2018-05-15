@@ -6,7 +6,7 @@ node {
     }
 
     try {
-        stage('Integration Tests') {
+        stage('E2E Tests') {
             echo "***** Running Integration Tests *****"
             sh "./gradlew clean e2e -Dbrowser.type=firefox"
             buildResult = 'SUCCESSFUL'
