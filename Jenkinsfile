@@ -1,4 +1,5 @@
 node {
+    def buildResult = 'STARTED'
     stage('Checkout') {
         echo "***** Checkout from github *****"
         checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'CleanBeforeCheckout']], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '22171b56-3429-48ab-a329-e29da327cde0', url: 'https://github.com/priyankshah217/SeleniumCucumberAutomation.git']]])
@@ -8,9 +9,10 @@ node {
         stage('Integration Tests') {
             echo "***** Running Integration Tests *****"
             sh "./gradlew clean e2e -Dbrowser.type=firefox"
+            buildResult = 'SUCCESSFUL'
         }
     } catch (Exception e) {
-        buildResult = "FAILED"
+        buildResult = 'FAILED'
         echo "Failure in Build and test"
         echo "Continuing to Archive Artifacts stage"
     }
