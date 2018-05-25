@@ -47,7 +47,18 @@ configurations {
     }
 }
 
-
+task resolveDependencies {
+    doLast {
+        project.rootProject.allprojects.each { subProject ->
+            subProject.buildscript.configurations.each { configuration ->
+                configuration.resolve()
+            }
+            subProject.configurations.each { configuration ->
+                configuration.resolve()
+            }
+        }
+    }
+}
 
 task e2e() {
     dependsOn assemble, compileTestJava
