@@ -12,6 +12,7 @@ import org.openqa.selenium.WebDriver;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Properties;
 
 
@@ -34,7 +35,7 @@ public class Hooks {
         }
     }
 
-    private void initDriver() {
+    private void initDriver() throws MalformedURLException {
         DriverFactory driverFactory = new DriverFactory();
         WebDriver driver = driverFactory.getDriver();
         try {
@@ -45,7 +46,7 @@ public class Hooks {
     }
 
     @Before
-    public void init() {
+    public void init() throws MalformedURLException {
         loadConfigPropertiesToContext();
         initDriver();
     }

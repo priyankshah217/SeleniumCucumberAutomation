@@ -1,42 +1,36 @@
 package com.test.webautomation.utils;
 
+import org.openqa.selenium.MutableCapabilities;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.remote.BrowserType;
-import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
 public class DriverFactory {
     private ContextManager contextManager = ContextManager.getInstance();
 
-    public WebDriver getDriver() {
-        String browserType = contextManager.get(KEY.BROWSER_TYPE).toString();
+    public WebDriver getDriver() throws MalformedURLException {
+        String browserType = System.getProperty("BrowserType");
+        String hostName = System.getProperty("SeleniumHub") == null ? "localhost" : System.getProperty("SeleniumHub");
         WebDriver webDriver;
+        MutableCapabilities options;
         switch (browserType) {
             case BrowserType.FIREFOX:
-                System.setProperty("webdriver.gecko.driver", contextManager.get(KEY.GECKO_DRIVER_PATH).toString());
-                DesiredCapabilities capabilities = DesiredCapabilities.firefox();
-                capabilities.setCapability(FirefoxDriver.MARIONETTE, false);
-                FirefoxProfile geoDisabled = new FirefoxProfile();
-                geoDisabled.setPreference("geo.enabled", false);
-                geoDisabled.setPreference("xpinstall.signatures.required", false);
-                geoDisabled.setPreference("geo.provider.use_corelocation", false);
-                geoDisabled.setPreference("geo.prompt.testing", false);
-                geoDisabled.setPreference("geo.prompt.testing.allow", false);
-                capabilities.setCapability(FirefoxDriver.PROFILE, geoDisabled);
-                webDriver = new FirefoxDriver();
+                options = new FirefoxOptions();
                 break;
             case BrowserType.CHROME:
-                System.setProperty("webdriver.chrome.driver", contextManager.get(KEY.CHROME_DRIVER_PATH).toString());
-                webDriver = new ChromeDriver();
+                options = new ChromeOptions();
                 break;
             default:
                 throw new IllegalArgumentException("Invalid browser type addToContext in class injection " + browserType);
 
         }
+        webDriver = new RemoteWebDriver(new URL("http://" + hostName + ":4444/wd/hub"), options);
         initWebDriver(webDriver);
         return webDriver;
     }
