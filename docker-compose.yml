@@ -1,0 +1,33 @@
+version: "3"
+services:
+    selenium-hub:
+      image: selenium/hub:latest
+      container_name: selenium-hub
+      ports:
+        - "4444:4444"
+    chrome:
+      image: selenium/node-chrome:latest
+      depends_on:
+        - selenium-hub
+      environment:
+        - HUB_PORT_4444_TCP_ADDR=selenium-hub
+        - HUB_PORT_4444_TCP_PORT=4444
+    firefox:
+      image: selenium/node-firefox:latest
+      depends_on:
+        - selenium-hub
+      environment:
+        - HUB_PORT_4444_TCP_ADDR=selenium-hub
+        - HUB_PORT_4444_TCP_PORT=4444
+
+    testautomation:
+      build: .
+      depends_on:
+        - chrome
+        - firefox
+      volumes:
+        - ${HOME}/.gradle/caches/:/root/.gradle/caches
+        - ./build:/usr/bin/app/build
+      environment:
+        - BROWSER=firefox
+        - SELENIUM_HUB=selenium-hub
