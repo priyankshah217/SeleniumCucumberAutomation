@@ -11,4 +11,3 @@ Feature: Search feature on amazon.in
     Examples:
       | SearchProducts |
       | computers      |
-      | jeans          |
